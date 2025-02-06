@@ -20,20 +20,20 @@ class tkCamera(tkinter.Frame):
         self.canvas.pack()
          
         # Button that lets the user take a snapshot
-        self.btn_snapshot = tkinter.Button(window, text="Snapshot", width=50, command=self.snapshot)
-        self.btn_snapshot.pack(anchor=tkinter.CENTER, expand=True)
+        #self.btn_snapshot = tkinter.Button(window, text="Snapshot", width=50, command=self.snapshot)
+        #self.btn_snapshot.pack(anchor=tkinter.CENTER, expand=True)
          
         # After it is called once, the update method will be automatically called every delay milliseconds
         self.delay = 15
         self.update_widget()
-    
+    """
     def snapshot(self):
         # Get a frame from the video source
         ret, frame = self.vid.get_frame()
         
         if ret:
             cv2.imwrite("frame-" + time.strftime("%d-%m-%Y-%H-%M-%S") + ".jpg", cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-        
+    """    
     def update_widget(self):
         # Get a frame from the video source
         ret, frame = self.vid.get_frame()

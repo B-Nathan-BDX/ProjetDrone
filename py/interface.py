@@ -1,12 +1,75 @@
 import tkinter as tk
 from tkinter import messagebox
-import cv2, time
+
+import cv2
+import PIL.Image, PIL.ImageTk
+import time
+
+class tkCamera(tk.Frame):
+
+    def __init__(self, window, video_source=0):
+        super().__init__(window)
+        
+        self.window = window
+        
+        #self.window.title(window_title)
+        self.video_source = video_source
+        self.vid = MyVideoCapture(self.video_source)
+
+        self.canvas = tk.Canvas(window, width=self.vid.width, height=self.vid.height)
+        self.canvas.pack()
+          
+        # After it is called once, the update method will be automatically called every delay milliseconds
+        self.delay = 15
+        self.update_widget()
+    
+    def update_widget(self):
+        # Get a frame from the video source
+        ret, frame = self.vid.get_frame()
+        
+        if ret:
+            self.image = PIL.Image.fromarray(frame)
+            self.photo = PIL.ImageTk.PhotoImage(image=self.image)
+            self.canvas.create_image(0, 0, image = self.photo, anchor = tk.NW)
+        
+        self.window.after(self.delay, self.update_widget)
+
+class MyVideoCapture:
+    def __init__(self, video_source=0):
+        # Open the video source
+        self.vid = cv2.VideoCapture(video_source)
+        if not self.vid.isOpened():
+            raise ValueError("Unable to open video source", video_source)
+    
+        # Get video source width and height
+        self.width = self.vid.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.height = self.vid.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    
+        self.width = 800
+        self.height = 600 
+    
+    def get_frame(self):
+        if self.vid.isOpened():
+            ret, frame = self.vid.read()
+            if ret:
+                frame = cv2.resize(frame, (800, 600))
+                # Return a boolean success flag and the current frame converted to BGR
+                return (ret, cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+            else:
+                return (ret, None)
+        else:
+            return (ret, None)
+    
+    # Release the video source when the object is destroyed
+    def __del__(self):
+        if self.vid.isOpened():
+            self.vid.release()
 
 class DroneControlInterface(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Interface de Contrôle du Drone")
-        self.geometry("900x600")
+        self.geometry("900x800")
         self.configure(bg="white")
 
         self.is_on = False  # État initial du drone
@@ -27,14 +90,16 @@ class DroneControlInterface(tk.Tk):
         self.create_on_off_button()
 
     def create_camera_display(self):
-        camera_frame = tk.LabelFrame(self, text="Caméra", bg="black", fg="white", font=("Arial", 14))
-        camera_frame.place(x=50, y=50, width=800, height=300)
-        camera_label = tk.Label(camera_frame, text="[Flux vidéo en direct]", font=("Arial", 16), bg="black", fg="white")
-        camera_label.pack(expand=True)
+        camera_frame = tkCamera(self)
+        camera_frame.pack()
+        # camera_frame = tk.LabelFrame(self, text="Caméra", bg="black", fg="white", font=("Arial", 14))
+        # camera_frame.place(x=50, y=50, width=800, height=300)
+        # camera_label = tk.Label(camera_frame, text="[Flux vidéo en direct]", font=("Arial", 16), bg="black", fg="white")
+        # camera_label.pack(expand=True)
 
     def create_manual_controls(self):
         manual_frame = tk.Frame(self)
-        manual_frame.place(x=50, y=380, width=800, height=150)
+        manual_frame.place(x=50, y=600, width=800, height=150)
 
         joystick_frame = tk.Frame(manual_frame)
         joystick_frame.grid(row=0, column=0, padx=20)
