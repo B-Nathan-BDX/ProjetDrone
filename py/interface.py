@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import cv2, time
 
 class DroneControlInterface(tk.Tk):
     def __init__(self):
